@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4f46e5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="الإقامات">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>متابعة الإقامات</title>
+<style>
+  :root {
+    --primary: #4f46e5;
+    --primary-2: #7c3aed;
+    --bg: #f5f7fb;
+    --card: #ffffff;
+    --text: #0f172a;
+    --muted: #64748b;
+    --ok: #10b981;
+    --warn: #f97316;
+    --danger: #ef4444;
+    --border: #e2e8f0;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 96px;
+  }
+
+  header {
+    background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    color: #fff;
+    padding: 28px 20px 56px;
+    border-radius: 0 0 28px 28px;
+    box-shadow: 0 10px 30px rgba(79, 70, 229, .25);
+  }
+  header h1 { font-size: 22px; font-weight: 700; }
+  header p { font-size: 14px; opacity: .85; margin-top: 4px; }
+
+  main { max-width: 640px; margin: -36px auto 0; padding: 0 16px; }
+
+  .page { display: none; animation: fade .3s ease; }
+  .page.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, .06);
+    border: 1px solid var(--border);
+  }
+  .card h2 { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+  .field input {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    font-size: 16px;
+    background: #f8fafc;
+    font-family: inherit;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .field input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(79,70,229,.12); background: #fff; }
+
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border: 0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform .15s, box-shadow .15s;
+    box-shadow: 0 6px 16px rgba(79,70,229,.3);
+  }
+  .btn:active { transform: scale(.98); }
+  .btn.small { width: auto; padding: 8px 14px; font-size: 13px; border-radius: 10px; background: #fee2e2; color: var(--danger); box-shadow: none; }
+  .btn.ghost { background: #ecfdf5; color: #047857; box-shadow: none; }
+
+  #status { margin-top: 14px; font-weight: 600; color: var(--ok); text-align: center; min-height: 20px; }
+
+  .record {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 16px;
+    border-radius: 16px;
+    margin-bottom: 12px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .record::before {
+    content: "";
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 5px;
+    background: var(--muted);
+  }
+  .record.ok::before { background: var(--ok); }
+  .record.warn::before { background: var(--warn); }
+  .record.danger::before { background: var(--danger); }
+  .record .name { font-weight: 700; font-size: 16px; }
+  .record .date { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .record .actions { margin-top: 10px; }
+
+  .ring {
+    min-width: 84px; height: 84px;
+    border-radius: 50%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-weight: 800;
+    border: 4px solid;
+  }
+  .ring .num { font-size: 24px; line-height: 1; }
+  .ring .lbl { font-size: 11px; font-weight: 600; color: var(--muted); margin-top: 3px; }
+  .record.ok .ring { border-color: var(--ok); color: #047857; }
+  .record.warn .ring { border-color: var(--warn); color: #c2410c; }
+  .record.danger .ring { border-color: var(--danger); color: #b91c1c; }
+  .record.danger { background: #fef2f2; }
+
+  .empty { text-align: center; color: var(--muted); padding: 32px 0; font-size: 15px; }
+  .empty .big { font-size: 40px; margin-bottom: 8px; }
+
+  .alert-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px;
+    border-radius: 14px;
+    margin-bottom: 10px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    font-size: 15px;
+  }
+  .alert-item.red { background: #fef2f2; border-color: #fecaca; }
+  .alert-item .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--warn); flex-shrink: 0; }
+  .alert-item.red .dot { background: var(--danger); }
+
+  nav {
+    position: fixed;
+    bottom: 14px; left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 32px);
+    max-width: 520px;
+    display: flex;
+    background: rgba(255,255,255,.92);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px;
+    box-shadow: 0 10px 30px rgba(15,23,42,.12);
+  }
+  nav button {
+    flex: 1;
+    padding: 10px 4px;
+    border: 0;
+    background: none;
+    border-radius: 14px;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .2s;
+  }
+  nav button .icon { display: block; font-size: 20px; margin-bottom: 2px; }
+  nav button.active { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #fff; font-weight: 700; }
+
+  #splash { position: fixed; inset: 0; z-index: 999; overflow: hidden; background: radial-gradient(circle at 50% 40%, #1e1b4b 0%, #0b1020 70%); display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; transition: opacity .6s ease, visibility .6s; }
+  #splash.hide { opacity: 0; visibility: hidden; }
+  .sp-logo { position: relative; width: 120px; height: 120px; border-radius: 50%; background: #111836; box-shadow: 0 0 60px rgba(124,58,237,.5); display: flex; align-items: center; justify-content: center; font-size: 52px; animation: pop .9s cubic-bezier(.2,1.4,.4,1) both; }
+  .sp-logo::before { content: ""; position: absolute; inset: -12px; border-radius: 50%; border: 3px solid transparent; border-top-color: #7c3aed; border-right-color: #db2777; animation: spin 1.6s linear infinite; }
+  .sp-title { font-size: 28px; font-weight: 800; letter-spacing: .5px; margin-top: 22px; background: linear-gradient(90deg, #c4b5fd, #f9a8d4); -webkit-background-clip: text; background-clip: text; color: transparent; animation: rise .8s .25s both; }
+  .sp-sub { font-size: 14px; color: #94a3b8; margin-top: 8px; animation: rise .8s .4s both; }
+  .sp-bar { width: 180px; height: 4px; background: #1e293b; border-radius: 4px; margin-top: 34px; overflow: hidden; animation: rise .8s .5s both; }
+  .sp-bar span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #7c3aed, #db2777); border-radius: 4px; animation: load 2.2s .5s ease forwards; }
+  @keyframes pop { from { transform: scale(.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  @keyframes rise { from { transform: translateY(14px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes load { to { width: 100%; } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div id="splash">
+  <div class="sp-logo">🪪</div>
+  <div class="sp-title">متابعة الإقامات</div>
+  <div class="sp-sub">تابع انتهاء إقاماتك بسهولة</div>
+  <div class="sp-bar"><span></span></div>
+</div>
+
+<header>
+  <h1>متابعة الإقامات</h1>
+  <p>اعرف فاضل كام يوم على انتهاء كل إقامة</p>
+</header>
+
+<main>
+
+  <!-- صفحة الإضافة -->
+  <section class="page active" id="page-add">
+    <div class="card">
+      <h2>إضافة إقامة جديدة</h2>
+      <form id="form">
+        <div class="field">
+          <label>اسم العامل</label>
+          <input id="name" required placeholder="مثال: أحمد محمد">
+        </div>
+        <div class="field">
+          <label>رقم الإقامة</label>
+          <input id="iqamaNo" required inputmode="numeric" placeholder="مثال: 2123456789">
+        </div>
+        <div class="field">
+          <label>تاريخ انتهاء الإقامة</label>
+          <input type="date" id="end" required>
+        </div>
+        <button class="btn" type="submit">حفظ</button>
+        <div id="status"></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- صفحة القائمة -->
+  <section class="page" id="page-list">
+    <div id="list"></div>
+    <div style="text-align:center;margin-top:8px"><button class="btn small" onclick="clearAll()">مسح كل البيانات</button></div>
+  </section>
+
+  <!-- صفحة التنبيهات -->
+  <section class="page" id="page-alerts">
+    <div class="card">
+      <h2>الإشعارات</h2>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.6;">
+        هيوصلك تنبيه كل يوم لأي إقامة هتخلص خلال 60 يوم أو أقل.
+      </p>
+      <button class="btn ghost" id="notifyBtn">تفعيل الإشعارات</button>
+    </div>
+    <div class="card">
+      <h2>قريبة من الانتهاء</h2>
+      <div id="alerts"></div>
+    </div>
+  </section>
+
+  <!-- صفحة حول -->
+  <section class="page" id="page-about">
+    <div class="card" style="text-align:center;padding:32px 20px">
+      <div style="font-size:48px">👨‍💻</div>
+      <h2 style="margin-top:12px">متابعة الإقامات</h2>
+      <p style="color:var(--muted);font-size:14px;line-height:1.7">تطبيق لمتابعة تاريخ انتهاء الإقامات</p>
+      <p style="font-size:18px;font-weight:700;margin-top:16px">ِBy Adam Raslan</p>
+      <a class="btn ghost" href="https://github.com/raslanadam300" target="_blank" rel="noopener" style="display:block;margin-top:16px;text-decoration:none;text-align:center">GitHub</a>
+    </div>
+  </section>
+
+</main>
+
+<nav>
+  <button class="active" data-page="page-add"><span class="icon">➕</span>إضافة</button>
+  <button data-page="page-list"><span class="icon">📋</span>الإقامات</button>
+  <button data-page="page-alerts"><span class="icon">🔔</span>التنبيهات</button>
+  <button data-page="page-about"><span class="icon">ℹ️</span>حول</button>
+</nav>
+
+<script>
+const KEY = "iqamas";
+const NOTIFY_KEY = "iqamaNotified";
+
+// تخزين آمن: لو المتصفح منع localStorage بيحفظ في الذاكرة
+let memStore = {};
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return memStore[k] ?? null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) { memStore[k] = v; } }
+};
+
+let items = [];
+try { items = JSON.parse(store.get(KEY) || "[]"); } catch (e) { items = []; }
+
+function save() { store.set(KEY, JSON.stringify(items)); }
+
+function daysLeft(dateStr) {
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const end = new Date(dateStr + "T00:00:00");
+  return Math.round((end - today) / 86400000);
+}
+
+function levelOf(n) {
+  if (n < 0) return "danger";
+  if (n <= 30) return "warn";
+  return "ok";
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+function msgFor(n) {
+  if (n < 0) return "منتهية";
+  if (n === 0) return "تنتهي النهارده";
+  return "فاضل " + n + " يوم";
+}
+
+function ringFor(n) {
+  if (n < 0) return `<div class="ring"><div class="num">${Math.abs(n)}</div><div class="lbl">منتهية</div></div>`;
+  return `<div class="ring"><div class="num">${n}</div><div class="lbl">يوم</div></div>`;
+}
+
+function render() {
+  const sorted = [...items].sort((a, b) => a.end.localeCompare(b.end));
+
+  // صفحة القائمة
+  const list = document.getElementById("list");
+  if (sorted.length === 0) {
+    list.innerHTML = `<div class="card empty"><div class="big">🪪</div>مفيش إقامات مضافة لسه</div>`;
+  } else {
+    list.innerHTML = sorted.map(i => {
+      const n = daysLeft(i.end);
+      return `
+        <div class="record ${levelOf(n)}">
+          <div>
+            <div class="name">${escapeHtml(i.name)}</div>
+            <div class="date">رقم الإقامة: ${escapeHtml(i.iqamaNo || "-")}</div>
+            <div class="date">تنتهي: ${i.end}</div>
+            <div class="actions"><button class="btn small" onclick="removeItem('${i.id}')">حذف</button></div>
+          </div>
+          ${ringFor(n)}
+        </div>`;
+    }).join("");
+  }
+
+  // صفحة التنبيهات
+  const urgent = sorted.filter(i => daysLeft(i.end) <= 60);
+  const alertsEl = document.getElementById("alerts");
+  if (urgent.length === 0) {
+    alertsEl.innerHTML = `<div class="empty"><div class="big">✅</div>مفيش إقامات قربت تخلص</div>`;
+  } else {
+    alertsEl.innerHTML = urgent.map(i => {
+      const n = daysLeft(i.end);
+      return `<div class="alert-item ${n < 0 ? "red" : ""}"><span class="dot"></span><div><b>${escapeHtml(i.name)}</b> — ${msgFor(n)}</div></div>`;
+    }).join("");
+  }
+}
+
+function clearAll() {
+  if (!items.length) return;
+  if (!confirm("متأكد إنك عايز تمسح كل الإقامات؟ مش هترجع تاني.")) return;
+  items = [];
+  save();
+  store.set(NOTIFY_KEY, "{}");
+  render();
+}
+
+function removeItem(id) {
+  if (!confirm("تحذف الإقامة دي؟")) return;
+  items = items.filter(i => i.id !== id);
+  save();
+  render();
+}
+
+// التنقل
+document.querySelectorAll("nav button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById(btn.dataset.page).classList.add("active");
+    render();
+  });
+});
+
+// الإضافة
+document.getElementById("form").addEventListener("submit", e => {
+  e.preventDefault();
+  const endVal = document.getElementById("end").value;
+  if (!endVal || daysLeft(endVal) < 0) {
+    const st = document.getElementById("status");
+    st.style.color = "#ef4444";
+    st.textContent = "مينفعش تاريخ انتهاء قديم، لازم يكون تاريخ النهارده أو بعده";
+    return;
+  }
+  document.getElementById("status").style.color = "";
+  items.push({
+    id: String(Date.now()),
+    name: document.getElementById("name").value.trim(),
+    iqamaNo: document.getElementById("iqamaNo").value.trim(),
+    end: endVal
+  });
+  save();
+  e.target.reset();
+  render();
+  checkNotifications();
+  document.getElementById("status").textContent = "تم الحفظ ✅ (عدد الإقامات: " + items.length + ")";
+});
+
+// الإشعارات
+function checkNotifications() {
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  const today = new Date().toISOString().slice(0, 10);
+  let notified = {};
+  try { notified = JSON.parse(store.get(NOTIFY_KEY) || "{}"); } catch (e) { notified = {}; }
+  items.forEach(i => {
+    const n = daysLeft(i.end);
+    if (n <= 60 && notified[i.id] !== today) {
+      new Notification("تنبيه إقامة", { body: `إقامة ${i.name}: ${msgFor(n)}` });
+      notified[i.id] = today;
+    }
+  });
+  store.set(NOTIFY_KEY, JSON.stringify(notified));
+}
+
+document.getElementById("notifyBtn").addEventListener("click", async () => {
+  if (!("Notification" in window)) { alert("المتصفح ده مش بيدعم الإشعارات"); return; }
+  const perm = await Notification.requestPermission();
+  if (perm === "granted") {
+    alert("تم تفعيل الإشعارات");
+    checkNotifications();
+  } else {
+    alert("لازم تسمح بالإشعارات من إعدادات المتصفح");
+  }
+});
+
+render();
+checkNotifications();
+setInterval(() => { render(); checkNotifications(); }, 60 * 60 * 1000);
+setTimeout(() => document.getElementById("splash").classList.add("hide"), 2800);
+
+// تسجيل الـ Service Worker عشان التطبيق يتثبت ويشتغل أوفلاين
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
