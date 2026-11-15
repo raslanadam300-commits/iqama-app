@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<meta name="google-site-verification" content="cBmtHA6xp1PbgqBcRE6hCKbbk0-OwS46D4eyAebjyx4" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4f46e5">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -22,7 +23,24 @@
     --warn: #f97316;
     --danger: #ef4444;
     --border: #e2e8f0;
+    --input: #f8fafc;
+    --soft-red: #fef2f2;
+    --soft-amber: #fffbeb;
+    --nav: rgba(255,255,255,.92);
   }
+  [data-theme="dark"] {
+    --bg: #0b1020;
+    --card: #131b2e;
+    --text: #e5e7eb;
+    --muted: #94a3b8;
+    --border: #1f2a3f;
+    --input: #0f1729;
+    --soft-red: #2a1215;
+    --soft-amber: #2a1f0c;
+    --nav: rgba(19,27,46,.94);
+  }
+  html[data-theme="dark"] { color-scheme: dark; }
+
   * { box-sizing: border-box; margin: 0; }
   body {
     font-family: "Segoe UI", Tahoma, Arial, sans-serif;
@@ -30,234 +48,622 @@
     color: var(--text);
     min-height: 100vh;
     padding-bottom: 96px;
+    transition: background .3s, color .3s;
+    overflow-x: hidden;
   }
 
+  /* خلفية متحركة */
+  .blob {
+    position: fixed; border-radius: 50%; filter: blur(60px); opacity: .35;
+    z-index: -1; pointer-events: none; animation: blobMove 18s ease-in-out infinite alternate;
+  }
+  .b1 { width: 360px; height: 360px; background: #818cf8; top: -120px; left: -100px; }
+  .b2 { width: 320px; height: 320px; background: #f472b6; bottom: -140px; right: -120px; animation-duration: 22s; }
+  .b3 { width: 260px; height: 260px; background: #34d399; top: 40%; left: 60%; animation-duration: 26s; }
+  @keyframes blobMove { to { transform: translate(60px, -40px) scale(1.15); } }
+  [data-theme="dark"] .blob { opacity: .18; }
+
   header {
+    position: relative; overflow: hidden;
     background: linear-gradient(135deg, var(--primary), var(--primary-2));
     color: #fff;
     padding: 28px 20px 56px;
     border-radius: 0 0 28px 28px;
     box-shadow: 0 10px 30px rgba(79, 70, 229, .25);
   }
-  header h1 { font-size: 22px; font-weight: 700; }
-  header p { font-size: 14px; opacity: .85; margin-top: 4px; }
+  .orb {
+    position: absolute; border-radius: 50%; background: rgba(255,255,255,.14);
+    pointer-events: none; animation: float 7s ease-in-out infinite;
+  }
+  .o1 { width: 160px; height: 160px; top: -60px; left: -40px; }
+  .o2 { width: 110px; height: 110px; bottom: -40px; right: 30px; animation-delay: -3s; }
+  .o3 { width: 60px; height: 60px; top: 30px; right: 40%; animation-delay: -5s; }
+  @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+  header > .hdr-top { position: relative; z-index: 1; }
+  .hdr-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  header h1 { font-size: 22px; font-weight: 700; animation: hIn .8s cubic-bezier(.2,.8,.2,1) both; }
+  header p { font-size: 14px; opacity: .85; margin-top: 4px; animation: hIn .8s .15s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes hIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+  .hdr-btns { display: flex; gap: 8px; flex-shrink: 0; position: relative; z-index: 3; }
+  .hbtn {
+    background: rgba(255,255,255,.2);
+    border: 1px solid rgba(255,255,255,.35);
+    color: #fff; border-radius: 12px; padding: 8px 12px;
+    font-family: inherit; font-size: 14px; cursor: pointer; white-space: nowrap;
+    backdrop-filter: blur(6px);
+    transition: transform .2s;
+  }
+  .hbtn:hover { transform: scale(1.06); }
+  .hbtn:active { transform: scale(.94); }
+  .hbtn.spin { animation: spinOnce .6s cubic-bezier(.3,1.3,.5,1); }
+  @keyframes spinOnce { to { transform: rotate(360deg); } }
 
-  main { max-width: 640px; margin: -36px auto 0; padding: 0 16px; }
+  main { max-width: 640px; margin: -36px auto 0; padding: 0 16px 20px; }
 
-  .page { display: none; animation: fade .3s ease; }
-  .page.active { display: block; }
-  @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .page { display: none; }
+  .page.active { display: block; animation: pageIn .5s cubic-bezier(.2,.8,.2,1); }
+  @keyframes pageIn { from { opacity: 0; transform: translateY(16px) scale(.985); } to { opacity: 1; transform: none; } }
+
+  /* دخول متدرج للعناصر */
+  .st { animation: stIn .55s cubic-bezier(.2,.8,.2,1) var(--d, 0ms) backwards; }
+  @keyframes stIn { from { opacity: 0; transform: translateY(18px) scale(.97); } to { opacity: 1; transform: none; } }
 
   .card {
-    background: var(--card);
-    border-radius: 20px;
-    padding: 20px;
-    margin-bottom: 16px;
-    box-shadow: 0 4px 18px rgba(15, 23, 42, .06);
-    border: 1px solid var(--border);
+    background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 16px;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, .06); border: 1px solid var(--border);
+    backdrop-filter: blur(4px);
   }
   .card h2 { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
 
+  .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
+  .stat {
+    background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 16px;
+    box-shadow: 0 4px 14px rgba(15,23,42,.05); transition: transform .25s, box-shadow .25s;
+    backdrop-filter: blur(4px);
+  }
+  .stat:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(15,23,42,.1); }
+  .stat .n { font-size: 28px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .stat .t { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+  .mini {
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .mini:last-child { border-bottom: 0; }
+  .small { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  .pill { font-size: 12px; padding: 6px 10px; border-radius: 999px; font-weight: 700; white-space: nowrap; }
+  .pill.ok { background: rgba(16,185,129,.15); color: #059669; }
+  .pill.warn { background: rgba(249,115,22,.15); color: #ea580c; }
+  .pill.danger { background: rgba(239,68,68,.15); color: #dc2626; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+
   .field { margin-bottom: 16px; }
   .field label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
-  .field input {
-    width: 100%;
-    padding: 13px 14px;
-    border: 1.5px solid var(--border);
-    border-radius: 14px;
-    font-size: 16px;
-    background: #f8fafc;
-    font-family: inherit;
-    transition: border-color .2s, box-shadow .2s;
+  .field input, .field select {
+    width: 100%; padding: 13px 14px; border: 1.5px solid var(--border); border-radius: 14px;
+    font-size: 16px; background: var(--input); color: var(--text); font-family: inherit;
+    transition: border-color .25s, box-shadow .25s, transform .25s;
   }
-  .field input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(79,70,229,.12); background: #fff; }
+  .field input:focus, .field select:focus {
+    outline: none; border-color: var(--primary); transform: translateY(-1px);
+    box-shadow: 0 0 0 4px rgba(79,70,229,.14);
+  }
+  .field input::placeholder { color: var(--muted); opacity: .7; }
+  .field input[type="date"] {
+    direction: ltr; text-align: right; min-height: 50px;
+    font-variant-numeric: tabular-nums;
+  }
+  .field input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: .7; cursor: pointer; transition: opacity .2s, transform .2s;
+  }
+  .field input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; transform: scale(1.1); }
+  [data-theme="dark"] .field input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+
+  /* منتقي التاريخ الهجري */
+  .hsel { display: none; grid-template-columns: 1fr 1.7fr 1.2fr; gap: 8px; direction: rtl; }
+  .hsel select {
+    width: 100%; padding: 13px 10px; border: 1.5px solid var(--border); border-radius: 14px;
+    font-size: 15px; background: var(--input); color: var(--text); font-family: inherit;
+    transition: border-color .25s, box-shadow .25s;
+  }
+  .hsel select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(79,70,229,.14); }
 
   .btn {
-    width: 100%;
-    padding: 14px;
-    border: 0;
-    border-radius: 14px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-2));
-    color: #fff;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-    transition: transform .15s, box-shadow .15s;
+    position: relative; overflow: hidden;
+    width: 100%; padding: 14px; border: 0; border-radius: 14px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #fff;
+    font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; letter-spacing: .3px;
+    transition: transform .2s, box-shadow .2s, filter .2s;
     box-shadow: 0 6px 16px rgba(79,70,229,.3);
   }
-  .btn:active { transform: scale(.98); }
-  .btn.small { width: auto; padding: 8px 14px; font-size: 13px; border-radius: 10px; background: #fee2e2; color: var(--danger); box-shadow: none; }
-  .btn.ghost { background: #ecfdf5; color: #047857; box-shadow: none; }
+  .btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
+  .btn:active { transform: scale(.97); }
+  .btn.small { width: auto; padding: 6px 10px; font-size: 12px; border-radius: 9px; box-shadow: none; }
+  .btn.red { background: rgba(239,68,68,.15); color: var(--danger); }
+  .btn.blue { background: rgba(79,70,229,.15); color: var(--primary); }
+  .btn.green { background: rgba(16,185,129,.15); color: #059669; }
+  .btn.cyan { background: rgba(6,182,212,.15); color: #0e7490; }
+  .btn.ghost { background: rgba(16,185,129,.15); color: #059669; box-shadow: none; }
+  .btn.gray { background: var(--input); color: var(--muted); box-shadow: none; border: 1px solid var(--border); min-width: 110px; }
+  .btn.more { background: var(--card); color: var(--primary); border: 1px solid var(--border); box-shadow: none; margin-top: 6px; }
+
+  .ripple {
+    position: absolute; border-radius: 50%; background: rgba(255,255,255,.45);
+    transform: scale(0); animation: rip .6s ease-out forwards; pointer-events: none;
+  }
+  @keyframes rip { to { transform: scale(2.4); opacity: 0; } }
 
   #status { margin-top: 14px; font-weight: 600; color: var(--ok); text-align: center; min-height: 20px; }
+  #status.pop { animation: popIn .4s cubic-bezier(.3,1.6,.5,1); }
+  @keyframes popIn { from { transform: scale(.7); opacity: 0; } to { transform: none; opacity: 1; } }
+
+  .sticky-bar {
+    position: sticky; top: 0; z-index: 5; background: var(--bg);
+    padding: 8px 16px 10px; margin: 0 -16px 8px;
+  }
+  .sticky-bar input {
+    width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 14px;
+    font-size: 15px; background: var(--card); color: var(--text); font-family: inherit; margin-bottom: 8px;
+    transition: box-shadow .25s, border-color .25s;
+  }
+  .sticky-bar input::placeholder { color: var(--muted); opacity: .7; }
+  .sticky-bar input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(79,70,229,.12); }
+  .chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip-f {
+    position: relative; overflow: hidden;
+    padding: 7px 13px; border-radius: 999px; border: 1px solid var(--border);
+    background: var(--card); color: var(--muted); font-family: inherit; font-size: 13px;
+    cursor: pointer; white-space: nowrap; transition: all .3s;
+  }
+  .chip-f.active {
+    background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #fff;
+    border-color: transparent; transform: scale(1.04);
+  }
+
+  .count { font-size: 13px; color: var(--muted); margin: 4px 2px 8px; }
 
   .record {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    padding: 16px;
-    border-radius: 16px;
-    margin-bottom: 12px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    position: relative;
-    overflow: hidden;
+    position: relative; overflow: hidden;
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; border-radius: 14px; margin-bottom: 8px;
+    background: var(--card); border: 1px solid var(--border);
+    transition: transform .25s, box-shadow .25s;
+    backdrop-filter: blur(4px);
   }
-  .record::before {
-    content: "";
-    position: absolute;
-    right: 0; top: 0; bottom: 0;
-    width: 5px;
-    background: var(--muted);
-  }
+  .record:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(15,23,42,.1); }
+  .record::before { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 4px; background: var(--muted); }
   .record.ok::before { background: var(--ok); }
   .record.warn::before { background: var(--warn); }
   .record.danger::before { background: var(--danger); }
-  .record .name { font-weight: 700; font-size: 16px; }
-  .record .date { font-size: 13px; color: var(--muted); margin-top: 4px; }
-  .record .actions { margin-top: 10px; }
+  .record.danger { background: var(--soft-red); }
+  .record .info { flex: 1; min-width: 0; }
+  .record .name { font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .record .meta { font-size: 12px; color: var(--muted); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .record .actions { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .record.leave { animation: leave .3s ease forwards; }
+  @keyframes leave { to { opacity: 0; transform: translateX(-40px) scale(.94); } }
 
-  .ring {
-    min-width: 84px; height: 84px;
-    border-radius: 50%;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    font-weight: 800;
-    border: 4px solid;
+  /* حلقة التقدم */
+  .pr { position: relative; width: 64px; height: 64px; flex-shrink: 0; }
+  .pr svg { width: 64px; height: 64px; transform: rotate(-90deg); }
+  .pr-t { fill: none; stroke: rgba(148,163,184,.25); stroke-width: 6; }
+  .pr-p {
+    fill: none; stroke-width: 6; stroke-linecap: round;
+    stroke-dasharray: 163.36; stroke-dashoffset: var(--off);
+    animation: ringFill 1.1s .15s cubic-bezier(.2,.8,.2,1) both;
   }
-  .ring .num { font-size: 24px; line-height: 1; }
-  .ring .lbl { font-size: 11px; font-weight: 600; color: var(--muted); margin-top: 3px; }
-  .record.ok .ring { border-color: var(--ok); color: #047857; }
-  .record.warn .ring { border-color: var(--warn); color: #c2410c; }
-  .record.danger .ring { border-color: var(--danger); color: #b91c1c; }
-  .record.danger { background: #fef2f2; }
+  @keyframes ringFill { from { stroke-dashoffset: 163.36; } }
+  .pr.ok .pr-p { stroke: #10b981; }
+  .pr.warn .pr-p { stroke: #f97316; }
+  .pr.danger .pr-p { stroke: #ef4444; }
+  .pr-n { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .pr-n b { font-size: 17px; font-weight: 800; line-height: 1; }
+  .pr-n span { font-size: 9px; color: var(--muted); margin-top: 2px; }
 
   .empty { text-align: center; color: var(--muted); padding: 32px 0; font-size: 15px; }
   .empty .big { font-size: 40px; margin-bottom: 8px; }
 
   .alert-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 14px;
-    border-radius: 14px;
-    margin-bottom: 10px;
-    background: #fffbeb;
-    border: 1px solid #fde68a;
-    font-size: 15px;
+    display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 14px;
+    margin-bottom: 10px; background: var(--soft-amber); border: 1px solid #fde68a; font-size: 15px;
   }
-  .alert-item.red { background: #fef2f2; border-color: #fecaca; }
-  .alert-item .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--warn); flex-shrink: 0; }
+  .alert-item.red { background: var(--soft-red); border-color: #fecaca; }
+  .alert-item .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--warn); flex-shrink: 0; animation: pulse 1.6s infinite; }
   .alert-item.red .dot { background: var(--danger); }
 
+  .row { display: flex; gap: 10px; }
+  .row > * { flex: 1; }
+
+  /* شريط التنقل */
   nav {
-    position: fixed;
-    bottom: 14px; left: 50%;
-    transform: translateX(-50%);
-    width: calc(100% - 32px);
-    max-width: 520px;
-    display: flex;
-    background: rgba(255,255,255,.92);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 6px;
-    box-shadow: 0 10px 30px rgba(15,23,42,.12);
+    position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
+    width: calc(100% - 32px); max-width: 520px; display: flex;
+    background: var(--nav); backdrop-filter: blur(12px);
+    border: 1px solid var(--border); border-radius: 20px; padding: 6px;
+    box-shadow: 0 10px 30px rgba(15,23,42,.12); z-index: 200;
+  }
+  .ind {
+    position: absolute; top: 6px; bottom: 6px; border-radius: 14px; z-index: 0;
+    background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    box-shadow: 0 6px 16px rgba(79,70,229,.35);
+    transition: left .5s cubic-bezier(.3,1.25,.4,1), width .5s cubic-bezier(.3,1.25,.4,1);
   }
   nav button {
-    flex: 1;
-    padding: 10px 4px;
-    border: 0;
-    background: none;
-    border-radius: 14px;
-    font-family: inherit;
-    font-size: 13px;
-    color: var(--muted);
-    cursor: pointer;
-    transition: all .2s;
+    position: relative; z-index: 1; overflow: hidden;
+    flex: 1; padding: 9px 2px; border: 0; background: none; border-radius: 14px;
+    font-family: inherit; font-size: 12px; color: var(--muted); cursor: pointer;
+    transition: color .3s;
   }
-  nav button .icon { display: block; font-size: 20px; margin-bottom: 2px; }
-  nav button.active { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #fff; font-weight: 700; }
+  nav button .icon { display: block; font-size: 18px; margin-bottom: 2px; }
+  nav button.active { color: #fff; font-weight: 700; }
+  nav button.active .icon { animation: bob .6s cubic-bezier(.3,1.5,.5,1); }
+  @keyframes bob { 0% { transform: translateY(0); } 40% { transform: translateY(-4px) scale(1.15); } 100% { transform: none; } }
 
-  #splash { position: fixed; inset: 0; z-index: 999; overflow: hidden; background: radial-gradient(circle at 50% 40%, #1e1b4b 0%, #0b1020 70%); display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; transition: opacity .6s ease, visibility .6s; }
-  #splash.hide { opacity: 0; visibility: hidden; }
-  .sp-logo { position: relative; width: 120px; height: 120px; border-radius: 50%; background: #111836; box-shadow: 0 0 60px rgba(124,58,237,.5); display: flex; align-items: center; justify-content: center; font-size: 52px; animation: pop .9s cubic-bezier(.2,1.4,.4,1) both; }
-  .sp-logo::before { content: ""; position: absolute; inset: -12px; border-radius: 50%; border: 3px solid transparent; border-top-color: #7c3aed; border-right-color: #db2777; animation: spin 1.6s linear infinite; }
-  .sp-title { font-size: 28px; font-weight: 800; letter-spacing: .5px; margin-top: 22px; background: linear-gradient(90deg, #c4b5fd, #f9a8d4); -webkit-background-clip: text; background-clip: text; color: transparent; animation: rise .8s .25s both; }
-  .sp-sub { font-size: 14px; color: #94a3b8; margin-top: 8px; animation: rise .8s .4s both; }
-  .sp-bar { width: 180px; height: 4px; background: #1e293b; border-radius: 4px; margin-top: 34px; overflow: hidden; animation: rise .8s .5s both; }
-  .sp-bar span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #7c3aed, #db2777); border-radius: 4px; animation: load 2.2s .5s ease forwards; }
-  @keyframes pop { from { transform: scale(.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-  @keyframes rise { from { transform: translateY(14px); opacity: 0; } to { transform: none; opacity: 1; } }
-  @keyframes load { to { width: 100%; } }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  /* نافذة الكارت */
+  .modal { position: fixed; inset: 0; z-index: 500; display: none; align-items: center; justify-content: center; padding: 20px; }
+  .modal.open { display: flex; }
+  .m-bg {
+    position: absolute; inset: 0; background: rgba(2,6,23,.65);
+    backdrop-filter: blur(8px); animation: fadeIn .3s ease both;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .m-wrap {
+    position: relative; display: flex; flex-direction: column; align-items: center; gap: 20px;
+    animation: zoomIn .55s cubic-bezier(.2,.9,.3,1.25) both;
+  }
+  @keyframes zoomIn { from { opacity: 0; transform: scale(.7) translateY(30px); } to { opacity: 1; transform: none; } }
+  .m-stage { perspective: 1100px; width: min(330px, 86vw); aspect-ratio: 1.6; }
+  .tilt {
+    width: 100%; height: 100%; transform-style: preserve-3d;
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition: transform .25s ease-out;
+  }
+  .flip-inner {
+    position: relative; width: 100%; height: 100%; transform-style: preserve-3d;
+    transition: transform .9s cubic-bezier(.2,.8,.2,1); cursor: pointer;
+  }
+  .flip-inner.flipped { transform: rotateY(180deg); }
+  .face {
+    position: absolute; inset: 0; border-radius: 20px; overflow: hidden; color: #fff; padding: 16px;
+    backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    box-shadow: 0 30px 60px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.15);
+  }
+  .face.back { transform: rotateY(180deg); }
+  .face::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(45deg, rgba(255,255,255,.04) 0 2px, transparent 2px 12px);
+  }
+  .face.ok { background: linear-gradient(135deg, #052e16 0%, #059669 60%, #10b981 100%); }
+  .face.warn { background: linear-gradient(135deg, #431407 0%, #c2410c 55%, #f97316 100%); }
+  .face.danger { background: linear-gradient(135deg, #450a0a 0%, #991b1b 55%, #dc2626 100%); }
+  .face .shine {
+    position: absolute; inset: 0; pointer-events: none; mix-blend-mode: overlay;
+    background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.35) 50%, transparent 65%);
+    background-size: 250% 100%; animation: sheen 3.5s infinite;
+  }
+  @keyframes sheen { 0% { background-position: 150% 0; } 100% { background-position: -50% 0; } }
+  .f-top { display: flex; justify-content: space-between; font-size: 10px; opacity: .9; }
+  .f-top b { font-size: 12px; font-weight: 800; }
+  .f-chip { position: absolute; left: 16px; top: 48px; width: 38px; height: 29px; border-radius: 6px; background: linear-gradient(135deg, #fde68a, #d97706 60%, #fcd34d); }
+  .f-status {
+    position: absolute; right: 16px; top: 44px; font-size: 11px; font-weight: 800;
+    padding: 5px 10px; border-radius: 999px; background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.35);
+  }
+  .f-name { position: absolute; left: 16px; right: 16px; top: 96px; font-size: 18px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .f-row { position: absolute; left: 16px; right: 16px; top: 132px; display: flex; justify-content: space-between; font-family: "Courier New", monospace; font-size: 11px; opacity: .9; }
+  .f-hint { position: absolute; left: 0; right: 0; bottom: 12px; text-align: center; font-size: 10px; opacity: .7; }
+  .f-strip { position: absolute; left: 0; right: 0; top: 0; height: 44px; background: rgba(0,0,0,.45); }
+  .b-days { position: absolute; left: 16px; right: 16px; top: 58px; text-align: center; }
+  .b-days b { display: block; font-size: 44px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
+  .b-days span { font-size: 12px; opacity: .85; }
+  .b-bar {
+    position: absolute; left: 16px; right: 16px; top: 124px; height: 38px;
+    background: #fff; border-radius: 6px; padding: 4px 8px;
+    display: flex; justify-content: center; align-items: stretch; overflow: hidden;
+  }
+  .b-bar i { display: block; background: #0f172a; flex-shrink: 0; }
+  .b-bar u { display: block; flex-shrink: 0; }
+  .b-info { position: absolute; left: 16px; right: 16px; bottom: 12px; display: flex; justify-content: space-between; font-size: 11px; opacity: .9; }
+  .m-hint { font-size: 13px; color: #e2e8f0; opacity: .85; text-align: center; }
+
+  /* رسائل منبثقة */
+  #toast { position: fixed; top: 14px; left: 0; right: 0; z-index: 700; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
+  .toast {
+    background: #0f172a; color: #fff; padding: 10px 18px; border-radius: 999px;
+    font-size: 14px; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,.3);
+    transform: translateY(-30px) scale(.9); opacity: 0;
+    transition: transform .4s cubic-bezier(.3,1.4,.5,1), opacity .3s;
+  }
+  .toast.show { transform: none; opacity: 1; }
+  .toast.ok { background: #059669; }
+  .toast.bad { background: #dc2626; }
+
+  /* =================== الشاشة الافتتاحية =================== */
+  #splash { position: fixed; inset: 0; z-index: 999; overflow: hidden; color: #fff; }
+  .bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 50% 38%, #3f0b0b 0%, #130608 45%, #07070c 80%);
+  }
+  .cardWrap {
+    position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%);
+    width: min(300px, 84vw); opacity: 0; z-index: 3;
+    transition: transform .9s cubic-bezier(.5,0,.2,1), opacity .4s ease;
+  }
+  .cardWrap.in { animation: flyIn .9s cubic-bezier(.2,.8,.2,1) forwards; }
+  @keyframes flyIn {
+    from { opacity: 0; transform: translate(-50%, -160vh) rotate(-14deg); }
+    to   { opacity: 1; transform: translate(-50%, -50%) rotate(0); }
+  }
+  .ecard {
+    position: relative; width: 100%; aspect-ratio: 1.6;
+    border-radius: 16px; overflow: hidden; padding: 16px;
+    background: linear-gradient(135deg, #1f2937 0%, #7f1d1d 55%, #991b1b 100%);
+    box-shadow: 0 25px 50px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.12);
+  }
+  .e-top { display: flex; justify-content: space-between; align-items: center; font-size: 10px; opacity: .85; }
+  .e-top b { font-size: 12px; font-weight: 800; }
+  .e-name { margin-top: 26px; font-size: 20px; font-weight: 800; }
+  .e-row { display: flex; justify-content: space-between; gap: 8px; margin-top: 12px; font-size: 12px; opacity: .9; font-family: "Courier New", monospace; }
+  .e-strip { position: absolute; left: 0; right: 0; bottom: 0; height: 10px; background: repeating-linear-gradient(45deg, #ef4444 0 10px, #450a0a 10px 20px); }
+  .stamp {
+    position: absolute; top: 46px; left: 14px;
+    border: 3px solid #fca5a5; color: #fca5a5; border-radius: 8px;
+    padding: 4px 12px; font-size: 18px; font-weight: 900; letter-spacing: 1px;
+    opacity: 0; transform: rotate(-14deg) scale(2.6);
+  }
+  .stamp.show { animation: stampIn .45s cubic-bezier(.3,1.6,.5,1) forwards; }
+  @keyframes stampIn { to { opacity: 1; transform: rotate(-14deg) scale(1); } }
+  .cl {
+    position: absolute; left: 0; right: 0; top: 0; height: 3px; z-index: 2;
+    background: #fca5a5; box-shadow: 0 0 14px #ef4444, 0 0 4px #fff; opacity: 0;
+  }
+  .cl.go { animation: clScan 1.1s ease-in-out forwards; }
+  @keyframes clScan {
+    0%   { top: 0; opacity: 1; }
+    88%  { opacity: 1; }
+    100% { top: calc(100% - 3px); opacity: 0; }
+  }
+  .phone {
+    position: absolute; left: 50%; top: 50%;
+    width: 240px; height: 480px; z-index: 1;
+    border-radius: 34px; border: 6px solid #1e293b;
+    background: #0b0b10; overflow: hidden;
+    box-shadow: 0 25px 60px rgba(0,0,0,.7);
+    transform: translate(-50%, 140vh);
+    transition: transform .7s cubic-bezier(.2,.8,.2,1), top .8s, left .8s,
+                width .8s, height .8s, border-radius .8s, border-width .8s;
+  }
+  .phone.up { transform: translate(-50%, -50%); }
+  .phone.full { left: 0; top: 0; width: 100%; height: 100%; transform: none; border-radius: 0; border-width: 0; }
+  .scr { position: absolute; inset: 0; background: radial-gradient(circle at 50% 40%, #3b0a0a 0%, #0b0b10 75%); transition: opacity .5s; }
+  .phone.full .scr { opacity: 0; }
+  .scanPart { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; transition: opacity .4s; }
+  .scanPart.hide { opacity: 0; }
+  .vf { position: relative; width: 210px; height: 131px; }
+  .vf i { position: absolute; width: 26px; height: 26px; border: 0 solid #22d3ee; }
+  .vf .c1 { top: 0; left: 0; border-top-width: 3px; border-left-width: 3px; border-top-left-radius: 6px; }
+  .vf .c2 { top: 0; right: 0; border-top-width: 3px; border-right-width: 3px; border-top-right-radius: 6px; }
+  .vf .c3 { bottom: 0; left: 0; border-bottom-width: 3px; border-left-width: 3px; border-bottom-left-radius: 6px; }
+  .vf .c4 { bottom: 0; right: 0; border-bottom-width: 3px; border-right-width: 3px; border-bottom-right-radius: 6px; }
+  .scanTxt { font-size: 13px; color: #fca5a5; letter-spacing: .5px; }
+  .result {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+    opacity: 0; transform: scale(.8); transition: opacity .4s, transform .5s cubic-bezier(.3,1.5,.5,1);
+  }
+  .result.show { opacity: 1; transform: none; }
+  .warnIco {
+    width: 70px; height: 70px; border-radius: 50%;
+    background: #dc2626; color: #fff; font-size: 36px; font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+    animation: glow 1s ease-in-out infinite;
+  }
+  @keyframes glow { 50% { box-shadow: 0 0 40px 8px rgba(239,68,68,.6); } }
+  .verdict { font-size: 46px; font-weight: 900; color: #f87171; text-shadow: 0 0 18px rgba(239,68,68,.7); }
+  .alarm {
+    background: #dc2626; color: #fff; font-weight: 800;
+    padding: 6px 20px; border-radius: 999px; font-size: 15px;
+    animation: blink .8s steps(2) infinite;
+  }
+  @keyframes blink { 50% { opacity: .35; } }
+  .sub { font-size: 12px; color: #fecaca; text-align: center; padding: 0 16px; line-height: 1.6; }
+  .flash { position: absolute; inset: 0; background: rgba(239,68,68,.35); opacity: 0; pointer-events: none; }
+  .flash.go { animation: flash .6s ease-out; }
+  @keyframes flash { from { opacity: 1; } to { opacity: 0; } }
+  #appFrame {
+    position: absolute; inset: 0; width: 100%; height: 100%; border: 0;
+    background: #f5f7fb; opacity: 0; transition: opacity .5s; pointer-events: none;
+  }
+  #appFrame.show { opacity: 1; }
+  .brand { position: absolute; bottom: 7vh; left: 0; right: 0; text-align: center; z-index: 4; animation: rise .7s .6s both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  .sp-title {
+    font-size: 24px; font-weight: 800; letter-spacing: .5px;
+    background: linear-gradient(90deg, #fecaca, #fca5a5, #fde68a);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .sp-by { margin-top: 8px; font-size: 13px; letter-spacing: 2px; color: #94a3b8; font-weight: 600; }
+
+  /* وضع الـ embed */
+  body.embed * { animation: none !important; transition: none !important; }
+  body.embed .blob { display: none; }
 </style>
 </head>
 <body>
+
+<!-- الشاشة الافتتاحية -->
 <div id="splash">
-  <div class="sp-logo">🪪</div>
-  <div class="sp-title">متابعة الإقامات</div>
-  <div class="sp-sub">تابع انتهاء إقاماتك بسهولة</div>
-  <div class="sp-bar"><span></span></div>
+  <div class="bg"></div>
+  <div class="cardWrap" id="cardWrap">
+    <div class="ecard">
+      <div class="stamp" id="stamp">منتهية</div>
+      <div class="e-top"><span>المملكة العربية السعودية</span><b>بطاقة إقامة</b></div>
+      <div class="e-name" id="eName">-</div>
+      <div class="e-row"><span id="eNo">-</span><span id="eExp">-</span></div>
+      <div class="e-strip"></div>
+      <div class="cl" id="cl"></div>
+    </div>
+  </div>
+  <div class="phone" id="phone">
+    <div class="scr">
+      <div class="scanPart" id="scanPart">
+        <div class="vf" id="vf">
+          <i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i>
+        </div>
+        <div class="scanTxt">جاري فحص الإقامة…</div>
+      </div>
+      <div class="result" id="result">
+        <div class="warnIco">!</div>
+        <div class="verdict">منتهي</div>
+        <div class="alarm">إنذار</div>
+        <div class="sub" id="sub">-</div>
+      </div>
+      <div class="flash" id="flash"></div>
+    </div>
+    <iframe id="appFrame" src="index.html?embed=1" title="التطبيق" tabindex="-1"></iframe>
+  </div>
+  <div class="brand">
+    <div class="sp-title">متابعة الإقامات</div>
+    <div class="sp-by">By Adam Raslan</div>
+  </div>
 </div>
 
+<!-- خلفية متحركة -->
+<div class="blob b1"></div>
+<div class="blob b2"></div>
+<div class="blob b3"></div>
+
 <header>
-  <h1>متابعة الإقامات</h1>
-  <p>اعرف فاضل كام يوم على انتهاء كل إقامة</p>
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
+  <div class="orb o3"></div>
+  <div class="hdr-top">
+    <div>
+      <h1>متابعة الإقامات</h1>
+      <p>اعرف فاضل كام يوم على انتهاء كل إقامة</p>
+    </div>
+    <div class="hdr-btns">
+      <button class="hbtn" id="themeBtn" onclick="toggleTheme(this)">🌙</button>
+      <button class="hbtn" id="calBtn" onclick="toggleCal()">📅 ميلادي</button>
+    </div>
+  </div>
 </header>
 
 <main>
 
-  <!-- صفحة الإضافة -->
-  <section class="page active" id="page-add">
+  <!-- الرئيسية -->
+  <section class="page active" id="page-home">
+    <div class="stats" id="stats"></div>
     <div class="card">
-      <h2>إضافة إقامة جديدة</h2>
+      <h2>أقرب الإقامات للانتهاء</h2>
+      <div id="nextList"></div>
+    </div>
+  </section>
+
+  <!-- الإضافة -->
+  <section class="page" id="page-add">
+    <div class="card">
+      <h2 id="formTitle">إضافة إقامة جديدة</h2>
       <form id="form">
         <div class="field">
           <label>اسم العامل</label>
-          <input id="name" required placeholder="مثال: أحمد محمد">
+          <input id="name" required placeholder="مثال: أحمد محمد" autocomplete="off">
         </div>
         <div class="field">
-          <label>رقم الإقامة</label>
-          <input id="iqamaNo" required inputmode="numeric" placeholder="مثال: 2123456789">
+          <label>رقم الإقامة (10 أرقام)</label>
+          <input id="iqamaNo" required inputmode="numeric" maxlength="10" placeholder="2123456789" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>تاريخ ميلاد العامل</label>
+          <input type="date" id="birth" lang="ar-EG">
+          <div class="hsel" id="h-birth"></div>
+        </div>
+        <div class="field">
+          <label>تاريخ بداية الإقامة (اختياري)</label>
+          <input type="date" id="startDate" lang="ar-EG">
+          <div class="hsel" id="h-startDate"></div>
+        </div>
+        <div class="field">
+          <label>مدة الإقامة</label>
+          <select id="durSel">
+            <option value="0">حدد تاريخ الانتهاء يدوي</option>
+            <option value="1">سنة</option>
+            <option value="2">سنتين</option>
+            <option value="3">3 سنين</option>
+          </select>
         </div>
         <div class="field">
           <label>تاريخ انتهاء الإقامة</label>
-          <input type="date" id="end" required>
+          <input type="date" id="end" lang="ar-EG">
+          <div class="hsel" id="h-end"></div>
         </div>
-        <button class="btn" type="submit">حفظ</button>
+        <div class="row">
+          <button class="btn" type="submit" id="submitBtn">حفظ</button>
+          <button class="btn gray" type="button" id="cancelBtn" onclick="cancelEdit()" style="display:none">إلغاء</button>
+        </div>
         <div id="status"></div>
       </form>
     </div>
   </section>
 
-  <!-- صفحة القائمة -->
+  <!-- الإقامات -->
   <section class="page" id="page-list">
+    <div class="sticky-bar">
+      <input id="search" placeholder="ابحث بالاسم أو رقم الإقامة" oninput="onSearch()" autocomplete="off">
+      <div class="chips">
+        <button class="chip-f active" data-f="all">الكل</button>
+        <button class="chip-f" data-f="ok">سليمة</button>
+        <button class="chip-f" data-f="warn">قربت تخلص</button>
+        <button class="chip-f" data-f="danger">منتهية</button>
+      </div>
+    </div>
+    <div class="count" id="count"></div>
     <div id="list"></div>
-    <div style="text-align:center;margin-top:8px"><button class="btn small" onclick="clearAll()">مسح كل البيانات</button></div>
+    <div id="moreWrap"></div>
+    <div style="text-align:center;margin-top:12px"><button class="btn red small" onclick="clearAll()">مسح كل البيانات</button></div>
   </section>
 
-  <!-- صفحة التنبيهات -->
+  <!-- التنبيهات -->
   <section class="page" id="page-alerts">
     <div class="card">
       <h2>الإشعارات</h2>
-      <p style="font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.6;">
-        هيوصلك تنبيه كل يوم لأي إقامة هتخلص خلال 60 يوم أو أقل.
-      </p>
+      <div class="field">
+        <label>نبهني قبل الانتهاء بـ</label>
+        <select id="thr">
+          <option value="30">30 يوم</option>
+          <option value="60">60 يوم</option>
+          <option value="90">90 يوم</option>
+        </select>
+      </div>
+      <p class="small" id="thrText" style="margin-bottom:14px;line-height:1.6"></p>
       <button class="btn ghost" id="notifyBtn">تفعيل الإشعارات</button>
     </div>
     <div class="card">
       <h2>قريبة من الانتهاء</h2>
       <div id="alerts"></div>
     </div>
+    <div class="card">
+      <h2>النسخ الاحتياطي</h2>
+      <p class="small" style="margin-bottom:14px;line-height:1.6">صدّر بياناتك لملف عشان لو المتصفح مسحها متضيعش.</p>
+      <div class="row">
+        <button class="btn blue" onclick="exportData()">تصدير</button>
+        <label class="btn gray" style="text-align:center;cursor:pointer;display:block">
+          استيراد
+          <input type="file" id="importFile" accept="application/json" style="display:none">
+        </label>
+      </div>
+    </div>
   </section>
 
-  <!-- صفحة حول -->
+  <!-- حول -->
   <section class="page" id="page-about">
     <div class="card" style="text-align:center;padding:32px 20px">
       <div style="font-size:48px">👨‍💻</div>
       <h2 style="margin-top:12px">متابعة الإقامات</h2>
-      <p style="color:var(--muted);font-size:14px;line-height:1.7">تطبيق لمتابعة تاريخ انتهاء الإقامات</p>
-      <p style="font-size:18px;font-weight:700;margin-top:16px">ِBy Adam Raslan</p>
+      <p class="small" style="line-height:1.7">تطبيق لمتابعة تاريخ انتهاء الإقامات</p>
+      <p style="font-size:18px;font-weight:700;margin-top:16px">adam raslan</p>
       <a class="btn ghost" href="https://github.com/raslanadam300" target="_blank" rel="noopener" style="display:block;margin-top:16px;text-decoration:none;text-align:center">GitHub</a>
     </div>
   </section>
@@ -265,17 +671,113 @@
 </main>
 
 <nav>
-  <button class="active" data-page="page-add"><span class="icon">➕</span>إضافة</button>
+  <div class="ind" id="ind"></div>
+  <button class="active" data-page="page-home"><span class="icon">🏠</span>الرئيسية</button>
+  <button data-page="page-add"><span class="icon">➕</span>إضافة</button>
   <button data-page="page-list"><span class="icon">📋</span>الإقامات</button>
-  <button data-page="page-alerts"><span class="icon">🔔</span>التنبيهات</button>
+  <button data-page="page-alerts"><span class="icon">🔔</span>تنبيهات</button>
   <button data-page="page-about"><span class="icon">ℹ️</span>حول</button>
 </nav>
 
-<script>
-const KEY = "iqamas";
-const NOTIFY_KEY = "iqamaNotified";
+<!-- نافذة الكارت -->
+<div class="modal" id="modal">
+  <div class="m-bg" onclick="closeCard()"></div>
+  <div class="m-wrap">
+    <div class="m-stage">
+      <div class="tilt" id="tilt">
+        <div class="flip-inner" id="flipInner" onclick="this.classList.toggle('flipped')">
+          <div class="face front" id="cFront"></div>
+          <div class="face back" id="cBack"></div>
+        </div>
+      </div>
+    </div>
+    <div class="m-hint">اضغط على الكارت عشان تقلبه، وحرّك الماوس أو الموبايل عشان يميل</div>
+    <button class="btn gray" style="width:auto;padding:10px 28px" onclick="closeCard()">إغلاق</button>
+  </div>
+</div>
 
-// تخزين آمن: لو المتصفح منع localStorage بيحفظ في الذاكرة
+<div id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const KEY = "iqamas", NOTIFY_KEY = "iqamaNotified", CAL_KEY = "calHijri", THEME_KEY = "theme", SET_KEY = "settings";
+const PAGE_SIZE = 20;
+
+// وضع الـ embed: الصفحة دي متفتحة جوه الموبايل في الشاشة الافتتاحية
+const EMBED = new URLSearchParams(location.search).has("embed");
+if (EMBED) document.body.classList.add("embed");
+
+// ===================== الشاشة الافتتاحية =====================
+(function () {
+  const splash = $("splash");
+  if (EMBED || !splash) { if (splash) splash.remove(); return; }
+
+  let list = [];
+  try { list = JSON.parse(localStorage.getItem("iqamas") || "[]"); } catch (e) {}
+  const hijri = localStorage.getItem("calHijri") === "1";
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+
+  const expired = list
+    .filter(x => x && x.end && new Date(x.end + "T00:00:00") < today)
+    .sort((a, b) => b.end.localeCompare(a.end));
+  const pick = expired[0];
+
+  let name = "أحمد محمد", no = "2123456789";
+  let endDate = new Date(today.getTime() - 3 * 864e5);
+  if (pick) { name = pick.name; no = pick.iqamaNo || "-"; endDate = new Date(pick.end + "T00:00:00"); }
+  const ago = Math.max(0, Math.round((today - endDate) / 864e5));
+
+  const expTxt = new Intl.DateTimeFormat(hijri ? "ar-SA-u-ca-islamic-umalqura-nu-latn" : "ar-EG-u-nu-latn",
+    { day: "numeric", month: "short", year: "numeric" }).format(endDate);
+
+  $("eName").textContent = name;
+  $("eNo").textContent = "رقم: " + no;
+  $("eExp").textContent = "انتهت: " + expTxt;
+  $("sub").textContent = ago === 0
+    ? "انتهت النهارده، لازم تجدد الإقامة فوراً"
+    : `انتهت من ${ago} يوم، لازم تجدد الإقامة`;
+
+  const card = $("cardWrap");
+  const phone = $("phone");
+  const vf = $("vf");
+
+  function vibrate() {
+    try { if (navigator.vibrate) navigator.vibrate([150, 80, 150, 80, 300]); } catch (e) {}
+  }
+
+  const t = (fn, ms) => setTimeout(fn, ms);
+
+  t(() => card.classList.add("in"), 150);
+  t(() => {
+    card.style.animation = "none";
+    card.style.opacity = "1";
+    card.style.transform = "translate(-50%, -50%)";
+  }, 1100);
+  t(() => $("stamp").classList.add("show"), 1400);
+  t(() => phone.classList.add("up"), 2400);
+  t(() => {
+    const v = vf.getBoundingClientRect();
+    const c = card.getBoundingClientRect();
+    const dx = (v.left + v.width / 2) - (c.left + c.width / 2);
+    const dy = (v.top + v.height / 2) - (c.top + c.height / 2);
+    const s = (v.width - 12) / c.width;
+    card.style.transform =
+      `translate(calc(-50% + ${dx.toFixed(1)}px), calc(-50% + ${dy.toFixed(1)}px)) scale(${s.toFixed(3)})`;
+  }, 3150);
+  t(() => $("cl").classList.add("go"), 4150);
+  t(() => {
+    card.style.opacity = "0";
+    $("scanPart").classList.add("hide");
+    $("result").classList.add("show");
+    $("flash").classList.add("go");
+    vibrate();
+  }, 5300);
+  t(() => phone.classList.add("full"), 6300);
+  t(() => $("appFrame").classList.add("show"), 6700);
+  t(() => splash.remove(), 7300);
+})();
+
+// ===================== التطبيق =====================
 let memStore = {};
 const store = {
   get(k) { try { return localStorage.getItem(k); } catch (e) { return memStore[k] ?? null; } },
@@ -285,69 +787,434 @@ const store = {
 let items = [];
 try { items = JSON.parse(store.get(KEY) || "[]"); } catch (e) { items = []; }
 
-function save() { store.set(KEY, JSON.stringify(items)); }
+let settings = { threshold: 60 };
+try { Object.assign(settings, JSON.parse(store.get(SET_KEY) || "{}")); } catch (e) {}
 
+let useHijri = store.get(CAL_KEY) === "1";
+let theme = store.get(THEME_KEY) || "light";
+let filter = "all";
+let shown = PAGE_SIZE;
+let editId = null;
+let anim = false;
+
+function save() { store.set(KEY, JSON.stringify(items)); }
+function saveSettings() { store.set(SET_KEY, JSON.stringify(settings)); }
+
+// ===== أدوات التاريخ الميلادي =====
+function pad(n) { return String(n).padStart(2, "0"); }
+function toISO(d) { return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
+function addYears(dateStr, n) {
+  const d = new Date(dateStr + "T00:00:00");
+  d.setFullYear(d.getFullYear() + n);
+  return toISO(d);
+}
 function daysLeft(dateStr) {
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const end = new Date(dateStr + "T00:00:00");
   return Math.round((end - today) / 86400000);
 }
 
-function levelOf(n) {
-  if (n < 0) return "danger";
-  if (n <= 30) return "warn";
-  return "ok";
+// ===== أدوات التاريخ الهجري =====
+const HM = ["محرم", "صفر", "ربيع الأول", "ربيع الثاني", "جمادى الأولى", "جمادى الآخرة",
+            "رجب", "شعبان", "رمضان", "شوال", "ذو القعدة", "ذو الحجة"];
+const HFMT = new Intl.DateTimeFormat("en-u-ca-islamic-umalqura-nu-latn",
+  { timeZone: "UTC", year: "numeric", month: "numeric", day: "numeric" });
+
+// تحويل تاريخ (Date عند الظهر UTC) لأجزاء هجرية
+function hParts(dt) {
+  const o = {};
+  HFMT.formatToParts(dt).forEach(p => { if (p.type !== "literal") o[p.type] = parseInt(p.value, 10); });
+  return { y: o.year, m: o.month, d: o.day };
 }
 
+// تحويل تاريخ هجري لميلادي (ISO). بيدور حوالين التقريب لحد ما يلاقي التطابق
+function hToIso(y, m, d) {
+  for (let dd = d; dd >= 1; dd--) {
+    const base = Date.UTC(622, 6, 19, 12) + ((y - 1) * 354.36707 + (m - 1) * 29.5306 + (dd - 1)) * 864e5;
+    for (let k = 0; k <= 45; k++) {
+      for (const s of (k ? [k, -k] : [0])) {
+        const dt = new Date(base + s * 864e5);
+        const p = hParts(dt);
+        if (p.y === y && p.m === m && p.d === dd) return dt.toISOString().slice(0, 10);
+      }
+    }
+  }
+  return null;
+}
+
+// بيبني القوائم الهجرية للحقل ويزامن قيمته مع الحقل الميلادي المخفي
+function hijriUI(fid) {
+  const wrap = $("h-" + fid);
+  const nat = $(fid);
+  if (!wrap || !nat) return;
+  const base = hParts(new Date((nat.value || toISO(new Date())) + "T12:00:00Z"));
+
+  let yOpts = "";
+  for (let y = base.y + 15; y >= base.y - 110; y--) {
+    yOpts += `<option value="${y}" ${y === base.y ? "selected" : ""}>${y}</option>`;
+  }
+  let dOpts = "";
+  for (let d = 1; d <= 30; d++) {
+    dOpts += `<option value="${d}" ${d === base.d ? "selected" : ""}>${d}</option>`;
+  }
+  const mOpts = HM.map((n, i) => `<option value="${i + 1}" ${i + 1 === base.m ? "selected" : ""}>${n}</option>`).join("");
+
+  wrap.innerHTML = `
+    <select data-p="d" aria-label="اليوم">${dOpts}</select>
+    <select data-p="m" aria-label="الشهر">${mOpts}</select>
+    <select data-p="y" aria-label="السنة">${yOpts}</select>`;
+
+  wrap.querySelectorAll("select").forEach(sel => {
+    sel.addEventListener("change", () => {
+      const y = +wrap.querySelector('[data-p="y"]').value;
+      const m = +wrap.querySelector('[data-p="m"]').value;
+      const d = +wrap.querySelector('[data-p="d"]').value;
+      const iso = hToIso(y, m, d);
+      if (!iso) return;
+      nat.value = iso;
+      nat.dispatchEvent(new Event("change"));
+      hijriUI(fid);
+    });
+  });
+}
+
+// يظهر الهجري أو الميلادي حسب الاختيار
+function applyDateMode() {
+  ["birth", "startDate", "end"].forEach(fid => {
+    const nat = $(fid), wrap = $("h-" + fid);
+    if (!nat || !wrap) return;
+    nat.style.display = useHijri ? "none" : "";
+    wrap.style.display = useHijri ? "grid" : "none";
+    if (useHijri) hijriUI(fid);
+  });
+}
+
+function fmtDate(s) {
+  if (!s) return "-";
+  if (!useHijri) return s;
+  try {
+    return new Intl.DateTimeFormat("ar-SA-u-ca-islamic-umalqura", { day: "numeric", month: "long", year: "numeric" })
+      .format(new Date(s + "T00:00:00"));
+  } catch (e) { return s; }
+}
+
+// ===== مساعدات =====
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
-
+function levelOf(n) { if (n < 0) return "danger"; if (n <= 30) return "warn"; return "ok"; }
 function msgFor(n) {
   if (n < 0) return "منتهية";
   if (n === 0) return "تنتهي النهارده";
   return "فاضل " + n + " يوم";
 }
+function withAnim(fn) { anim = true; try { fn(); } finally { anim = false; } }
+function stAttr(idx) { return anim ? `class="st" style="--d:${idx * 60}ms"` : ""; }
 
-function ringFor(n) {
-  if (n < 0) return `<div class="ring"><div class="num">${Math.abs(n)}</div><div class="lbl">منتهية</div></div>`;
-  return `<div class="ring"><div class="num">${n}</div><div class="lbl">يوم</div></div>`;
+// عداد متحرك للأرقام
+function countTo(el, val) {
+  if (!el) return;
+  const from = Number(el.dataset.v) || 0;
+  el.dataset.v = val;
+  const t0 = performance.now(), dur = 700;
+  (function step(now) {
+    const p = Math.min((now - t0) / dur, 1);
+    const e = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(from + (val - from) * e);
+    if (p < 1) requestAnimationFrame(step);
+  })(t0);
 }
 
-function render() {
-  const sorted = [...items].sort((a, b) => a.end.localeCompare(b.end));
+// رسالة منبثقة
+function toast(msg, kind) {
+  const el = document.createElement("div");
+  el.className = "toast " + (kind || "");
+  el.textContent = msg;
+  $("toast").appendChild(el);
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("show")));
+  setTimeout(() => {
+    el.classList.remove("show");
+    setTimeout(() => el.remove(), 400);
+  }, 2400);
+}
 
-  // صفحة القائمة
-  const list = document.getElementById("list");
-  if (sorted.length === 0) {
-    list.innerHTML = `<div class="card empty"><div class="big">🪪</div>مفيش إقامات مضافة لسه</div>`;
-  } else {
-    list.innerHTML = sorted.map(i => {
+// حلقة التقدم
+function ringHTML(i, n) {
+  const C = 163.36;
+  const total = i.start
+    ? Math.max(1, Math.round((new Date(i.end + "T00:00:00") - new Date(i.start + "T00:00:00")) / 86400000))
+    : 365;
+  const frac = n < 0 ? 0 : Math.min(Math.max(n / total, 0), 1);
+  const off = (C * (1 - frac)).toFixed(2);
+  return `<div class="pr ${levelOf(n)}">
+    <svg viewBox="0 0 64 64">
+      <circle class="pr-t" cx="32" cy="32" r="26"></circle>
+      <circle class="pr-p" cx="32" cy="32" r="26" style="--off:${off}"></circle>
+    </svg>
+    <div class="pr-n"><b>${Math.abs(n)}</b><span>${n < 0 ? "منتهية" : "يوم"}</span></div>
+  </div>`;
+}
+
+// ===== الوضع الداكن والتاريخ =====
+function applyTheme() {
+  document.documentElement.dataset.theme = theme;
+  $("themeBtn").textContent = theme === "dark" ? "☀️" : "🌙";
+}
+function toggleTheme(btn) {
+  theme = theme === "dark" ? "light" : "dark";
+  store.set(THEME_KEY, theme);
+  applyTheme();
+  if (btn) { btn.classList.remove("spin"); void btn.offsetWidth; btn.classList.add("spin"); }
+}
+function updateCalBtn() { $("calBtn").textContent = useHijri ? "🌙 هجري" : "📅 ميلادي"; }
+function toggleCal() {
+  useHijri = !useHijri;
+  store.set(CAL_KEY, useHijri ? "1" : "0");
+  updateCalBtn();
+  applyDateMode();
+  withAnim(render);
+}
+
+// ===== شريط التنقل المتحرك =====
+function moveInd(btn) {
+  if (!btn) return;
+  const ind = $("ind");
+  ind.style.width = btn.offsetWidth + "px";
+  ind.style.left = btn.offsetLeft + "px";
+}
+function showPage(id) {
+  document.querySelectorAll("nav button[data-page]").forEach(b => {
+    const on = b.dataset.page === id;
+    b.classList.toggle("active", on);
+    if (on) moveInd(b);
+  });
+  document.querySelectorAll(".page").forEach(p => p.classList.toggle("active", p.id === id));
+  withAnim(render);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+document.querySelectorAll("nav button[data-page]").forEach(btn => {
+  btn.addEventListener("click", () => showPage(btn.dataset.page));
+});
+
+// ===== الإحصائيات =====
+const statDefs = [
+  ["الإجمالي", "#4f46e5", "tot"],
+  ["سليمة", "#10b981", "ok"],
+  ["قربت تخلص", "#f97316", "warn"],
+  ["منتهية", "#ef4444", "exp"]
+];
+function buildStats() {
+  $("stats").innerHTML = statDefs.map(([t, c, k], idx) =>
+    `<div class="stat st" style="border-top:4px solid ${c};--d:${idx * 80}ms"><div class="n" id="s-${k}" style="color:${c}">0</div><div class="t">${t}</div></div>`
+  ).join("");
+}
+
+// ===== العرض =====
+function render() { renderHome(); renderList(); renderAlerts(); }
+
+function renderHome() {
+  let safe = 0, warn = 0, exp = 0;
+  items.forEach(i => {
+    const n = daysLeft(i.end);
+    if (n < 0) exp++; else if (n <= 30) warn++; else safe++;
+  });
+  countTo($("s-tot"), items.length);
+  countTo($("s-ok"), safe);
+  countTo($("s-warn"), warn);
+  countTo($("s-exp"), exp);
+
+  const next = items.filter(i => daysLeft(i.end) >= 0).sort((a, b) => a.end.localeCompare(b.end)).slice(0, 3);
+  $("nextList").innerHTML = next.length
+    ? next.map((i, idx) => {
+        const n = daysLeft(i.end);
+        return `<div class="mini" ${stAttr(idx)}><div><b>${escapeHtml(i.name)}</b><div class="small">${fmtDate(i.end)}</div></div><span class="pill ${levelOf(n)}">${msgFor(n)}</span></div>`;
+      }).join("")
+    : `<div class="empty">ضيف أول إقامة من صفحة الإضافة</div>`;
+}
+
+function filteredItems() {
+  const q = ($("search").value || "").trim().toLowerCase();
+  return [...items]
+    .sort((a, b) => a.end.localeCompare(b.end))
+    .filter(i => {
       const n = daysLeft(i.end);
-      return `
-        <div class="record ${levelOf(n)}">
-          <div>
-            <div class="name">${escapeHtml(i.name)}</div>
-            <div class="date">رقم الإقامة: ${escapeHtml(i.iqamaNo || "-")}</div>
-            <div class="date">تنتهي: ${i.end}</div>
-            <div class="actions"><button class="btn small" onclick="removeItem('${i.id}')">حذف</button></div>
-          </div>
-          ${ringFor(n)}
-        </div>`;
-    }).join("");
+      const okF = filter === "all" || (filter === "ok" && n > 30) || (filter === "warn" && n >= 0 && n <= 30) || (filter === "danger" && n < 0);
+      const okQ = !q || i.name.toLowerCase().includes(q) || (i.iqamaNo || "").includes(q);
+      return okF && okQ;
+    });
+}
+
+function recordHTML(i, idx) {
+  const n = daysLeft(i.end);
+  const cls = anim ? "st" : "";
+  const style = anim ? `--d:${idx * 55}ms` : "";
+  return `<div class="record ${levelOf(n)} ${cls}" data-id="${i.id}" style="${style}">
+    <div class="info">
+      <div class="name">${escapeHtml(i.name)}</div>
+      <div class="meta">${escapeHtml(i.iqamaNo || "-")} · تنتهي ${fmtDate(i.end)}</div>
+      <div class="actions">
+        <button class="btn small cyan" onclick="openCard('${i.id}')">🪪 كارت</button>
+        <button class="btn small blue" onclick="startEdit('${i.id}')">تعديل</button>
+        <button class="btn small green" onclick="renew('${i.id}')">تجديد</button>
+        <button class="btn small red" onclick="removeItem('${i.id}')">حذف</button>
+      </div>
+    </div>
+    ${ringHTML(i, n)}
+  </div>`;
+}
+
+function renderList() {
+  document.querySelectorAll(".chip-f").forEach(c => c.classList.toggle("active", c.dataset.f === filter));
+  const arr = filteredItems();
+  const visible = arr.slice(0, shown);
+
+  $("count").textContent = arr.length ? `عرض ${visible.length} من ${arr.length}` : "";
+
+  if (arr.length === 0) {
+    $("list").innerHTML = `<div class="card empty ${anim ? "st" : ""}"><div class="big">🪪</div>${items.length ? "مفيش نتايج" : "مفيش إقامات مضافة لسه"}</div>`;
+    $("moreWrap").innerHTML = "";
+    return;
   }
 
-  // صفحة التنبيهات
-  const urgent = sorted.filter(i => daysLeft(i.end) <= 60);
-  const alertsEl = document.getElementById("alerts");
-  if (urgent.length === 0) {
-    alertsEl.innerHTML = `<div class="empty"><div class="big">✅</div>مفيش إقامات قربت تخلص</div>`;
+  $("list").innerHTML = visible.map((i, idx) => recordHTML(i, idx)).join("");
+  $("moreWrap").innerHTML = arr.length > shown
+    ? `<button class="btn more" onclick="loadMore()">عرض المزيد (${arr.length - shown} باقي)</button>`
+    : "";
+}
+
+function loadMore() { shown += PAGE_SIZE; withAnim(renderList); }
+function onSearch() { shown = PAGE_SIZE; renderList(); }
+
+function renderAlerts() {
+  $("thr").value = String(settings.threshold);
+  $("thrText").textContent = `هيوصلك تنبيه كل يوم لأي إقامة هتخلص خلال ${settings.threshold} يوم أو أقل.`;
+  const urgent = items.filter(i => daysLeft(i.end) <= settings.threshold).sort((a, b) => a.end.localeCompare(b.end));
+  $("alerts").innerHTML = urgent.length
+    ? urgent.map((i, idx) => {
+        const n = daysLeft(i.end);
+        return `<div class="alert-item ${n < 0 ? "red" : ""} ${anim ? "st" : ""}" style="${anim ? `--d:${idx * 70}ms` : ""}"><span class="dot"></span><div><b>${escapeHtml(i.name)}</b> — ${msgFor(n)}</div></div>`;
+      }).join("")
+    : `<div class="empty"><div class="big">✅</div>مفيش إقامات قربت تخلص</div>`;
+}
+
+// ===== الفلاتر =====
+document.querySelectorAll(".chip-f").forEach(c => {
+  c.addEventListener("click", () => {
+    filter = c.dataset.f;
+    shown = PAGE_SIZE;
+    withAnim(renderList);
+  });
+});
+
+// ===== حساب تاريخ الانتهاء من البداية والمدة =====
+function autoEnd() {
+  const s = $("startDate").value;
+  const d = $("durSel").value;
+  if (s && d !== "0") $("end").value = addYears(s, parseInt(d, 10));
+  applyDateMode();
+}
+$("startDate").addEventListener("change", autoEnd);
+$("durSel").addEventListener("change", autoEnd);
+
+// ===== الإضافة والتعديل =====
+function showErr(msg) {
+  const st = $("status");
+  st.style.color = "#ef4444";
+  st.textContent = msg;
+  st.classList.remove("pop"); void st.offsetWidth; st.classList.add("pop");
+}
+function showOk(msg) {
+  const st = $("status");
+  st.style.color = "";
+  st.textContent = msg;
+  st.classList.remove("pop"); void st.offsetWidth; st.classList.add("pop");
+}
+
+$("form").addEventListener("submit", e => {
+  e.preventDefault();
+  const name = $("name").value.trim();
+  const iqamaNo = $("iqamaNo").value.trim();
+  const birth = $("birth").value;
+  const end = $("end").value;
+
+  if (!/^\d{10}$/.test(iqamaNo)) return showErr("رقم الإقامة لازم يكون 10 أرقام");
+  if (!end) return showErr("اختار تاريخ انتهاء الإقامة");
+  if (daysLeft(end) < 0) return showErr("مينفعش تاريخ انتهاء قديم، لازم يكون تاريخ النهارده أو بعده");
+
+  if (editId) {
+    const it = items.find(i => i.id === editId);
+    if (it) Object.assign(it, { name, iqamaNo, birth, end });
+    editId = null;
+    showOk("تم التعديل ✅");
+    toast("اتعدلت البيانات ✏️", "ok");
+    $("submitBtn").textContent = "حفظ";
+    $("formTitle").textContent = "إضافة إقامة جديدة";
+    $("cancelBtn").style.display = "none";
   } else {
-    alertsEl.innerHTML = urgent.map(i => {
-      const n = daysLeft(i.end);
-      return `<div class="alert-item ${n < 0 ? "red" : ""}"><span class="dot"></span><div><b>${escapeHtml(i.name)}</b> — ${msgFor(n)}</div></div>`;
-    }).join("");
+    items.push({ id: String(Date.now()), name, iqamaNo, birth, end });
+    showOk("تم الحفظ ✅ (عدد الإقامات: " + items.length + ")");
+    toast("اتضافت الإقامة ✅", "ok");
   }
+
+  save();
+  $("form").reset();
+  applyDateMode();
+  render();
+  checkNotifications();
+});
+
+function startEdit(id) {
+  const it = items.find(i => i.id === id);
+  if (!it) return;
+  editId = id;
+  $("name").value = it.name;
+  $("iqamaNo").value = it.iqamaNo || "";
+  $("birth").value = it.birth || "";
+  $("startDate").value = "";
+  $("durSel").value = "0";
+  $("end").value = it.end;
+  $("submitBtn").textContent = "حفظ التعديل";
+  $("formTitle").textContent = "تعديل بيانات الإقامة";
+  $("cancelBtn").style.display = "block";
+  applyDateMode();
+  showPage("page-add");
+}
+
+function cancelEdit() {
+  editId = null;
+  $("form").reset();
+  $("submitBtn").textContent = "حفظ";
+  $("formTitle").textContent = "إضافة إقامة جديدة";
+  $("cancelBtn").style.display = "none";
+  $("status").textContent = "";
+  applyDateMode();
+}
+
+// ===== التجديد =====
+function renew(id) {
+  const it = items.find(i => i.id === id);
+  if (!it) return;
+  const yrs = parseInt(prompt("مدة التجديد بالسنين؟ (1 أو 2 أو 3)", "1"), 10);
+  if (!yrs || yrs < 1 || yrs > 10) return;
+  const base = daysLeft(it.end) < 0 ? toISO(new Date()) : it.end;
+  it.end = addYears(base, yrs);
+  save();
+  render();
+  checkNotifications();
+  toast("اتجددت الإقامة 🔄", "ok");
+}
+
+// ===== الحذف =====
+function removeItem(id) {
+  if (!confirm("تحذف الإقامة دي؟")) return;
+  const el = document.querySelector(`.record[data-id="${id}"]`);
+  if (el) el.classList.add("leave");
+  setTimeout(() => {
+    items = items.filter(i => i.id !== id);
+    save();
+    render();
+    toast("اتمسحت الإقامة 🗑️", "bad");
+  }, el ? 300 : 0);
 }
 
 function clearAll() {
@@ -356,52 +1223,96 @@ function clearAll() {
   items = [];
   save();
   store.set(NOTIFY_KEY, "{}");
-  render();
+  withAnim(render);
+  toast("اتمسحت كل البيانات", "bad");
 }
 
-function removeItem(id) {
-  if (!confirm("تحذف الإقامة دي؟")) return;
-  items = items.filter(i => i.id !== id);
-  save();
-  render();
-}
-
-// التنقل
-document.querySelectorAll("nav button").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
-    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-    btn.classList.add("active");
-    document.getElementById(btn.dataset.page).classList.add("active");
-    render();
-  });
-});
-
-// الإضافة
-document.getElementById("form").addEventListener("submit", e => {
-  e.preventDefault();
-  const endVal = document.getElementById("end").value;
-  if (!endVal || daysLeft(endVal) < 0) {
-    const st = document.getElementById("status");
-    st.style.color = "#ef4444";
-    st.textContent = "مينفعش تاريخ انتهاء قديم، لازم يكون تاريخ النهارده أو بعده";
-    return;
+// ===== كارت الإقامة =====
+function barcode(s) {
+  let h = "";
+  for (const ch of String(s)) {
+    const c = ch.charCodeAt(0);
+    const w1 = (c % 3) * 2 + 2;
+    const w2 = ((c >> 1) % 2) * 2 + 2;
+    h += `<i style="width:${w1}px"></i><u style="width:${w2}px"></u>`;
   }
-  document.getElementById("status").style.color = "";
-  items.push({
-    id: String(Date.now()),
-    name: document.getElementById("name").value.trim(),
-    iqamaNo: document.getElementById("iqamaNo").value.trim(),
-    end: endVal
+  return h;
+}
+
+function fillCard(it) {
+  const n = daysLeft(it.end);
+  const lv = levelOf(n);
+  const stTxt = { ok: "سارية", warn: "قربت تنتهي", danger: "منتهية" }[lv];
+  $("cFront").className = `face front ${lv}`;
+  $("cFront").innerHTML = `
+    <div class="shine"></div>
+    <div class="f-top"><span>المملكة العربية السعودية</span><b>بطاقة إقامة</b></div>
+    <div class="f-chip"></div>
+    <span class="f-status">${stTxt}</span>
+    <div class="f-name">${escapeHtml(it.name)}</div>
+    <div class="f-row"><span>ID ${escapeHtml(it.iqamaNo || "-")}</span><span>EXP ${escapeHtml(fmtDate(it.end))}</span></div>
+    <div class="f-hint">اضغط عشان تقلب الكارت</div>`;
+  $("cBack").className = `face back ${lv}`;
+  $("cBack").innerHTML = `
+    <div class="f-strip"></div>
+    <div class="b-days"><b>${Math.abs(n)}</b><span>${n < 0 ? "يوم على الانتهاء" : "يوم فاضل على الانتهاء"}</span></div>
+    <div class="b-bar">${barcode(it.iqamaNo || "0000000000")}</div>
+    <div class="b-info"><span>الميلاد: ${escapeHtml(fmtDate(it.birth))}</span><span>${escapeHtml(it.name)}</span></div>`;
+}
+
+function openCard(id) {
+  const it = items.find(i => i.id === id);
+  if (!it) return;
+  fillCard(it);
+  $("flipInner").classList.remove("flipped");
+  $("modal").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+function closeCard() {
+  $("modal").classList.remove("open");
+  document.body.style.overflow = "";
+}
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeCard(); });
+
+// ميلان الكارت مع حركة الماوس أو اللمس
+(function () {
+  const tilt = $("tilt");
+  tilt.addEventListener("pointermove", e => {
+    const r = tilt.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - .5;
+    const y = (e.clientY - r.top) / r.height - .5;
+    tilt.style.setProperty("--rx", (-y * 18).toFixed(2) + "deg");
+    tilt.style.setProperty("--ry", (x * 22).toFixed(2) + "deg");
   });
-  save();
-  e.target.reset();
-  render();
-  checkNotifications();
-  document.getElementById("status").textContent = "تم الحفظ ✅ (عدد الإقامات: " + items.length + ")";
+  tilt.addEventListener("pointerleave", () => {
+    tilt.style.setProperty("--rx", "0deg");
+    tilt.style.setProperty("--ry", "0deg");
+  });
+})();
+
+// ===== تأثير الضغط على الأزرار =====
+document.addEventListener("pointerdown", e => {
+  const b = e.target.closest(".btn, nav button, .chip-f, .hbtn");
+  if (!b) return;
+  const r = b.getBoundingClientRect();
+  const s = document.createElement("span");
+  const size = Math.max(r.width, r.height);
+  s.className = "ripple";
+  s.style.width = s.style.height = size + "px";
+  s.style.left = (e.clientX - r.left - size / 2) + "px";
+  s.style.top = (e.clientY - r.top - size / 2) + "px";
+  b.appendChild(s);
+  setTimeout(() => s.remove(), 600);
 });
 
-// الإشعارات
+// ===== الإعدادات والتنبيهات =====
+$("thr").addEventListener("change", e => {
+  settings.threshold = parseInt(e.target.value, 10);
+  saveSettings();
+  renderAlerts();
+  checkNotifications();
+});
+
 function checkNotifications() {
   if (!("Notification" in window) || Notification.permission !== "granted") return;
   const today = new Date().toISOString().slice(0, 10);
@@ -409,7 +1320,7 @@ function checkNotifications() {
   try { notified = JSON.parse(store.get(NOTIFY_KEY) || "{}"); } catch (e) { notified = {}; }
   items.forEach(i => {
     const n = daysLeft(i.end);
-    if (n <= 60 && notified[i.id] !== today) {
+    if (n <= settings.threshold && notified[i.id] !== today) {
       new Notification("تنبيه إقامة", { body: `إقامة ${i.name}: ${msgFor(n)}` });
       notified[i.id] = today;
     }
@@ -417,27 +1328,67 @@ function checkNotifications() {
   store.set(NOTIFY_KEY, JSON.stringify(notified));
 }
 
-document.getElementById("notifyBtn").addEventListener("click", async () => {
-  if (!("Notification" in window)) { alert("المتصفح ده مش بيدعم الإشعارات"); return; }
+$("notifyBtn").addEventListener("click", async () => {
+  if (!("Notification" in window)) { toast("المتصفح ده مش بيدعم الإشعارات", "bad"); return; }
   const perm = await Notification.requestPermission();
   if (perm === "granted") {
-    alert("تم تفعيل الإشعارات");
+    toast("الإشعارات اتفعلت 🔔", "ok");
     checkNotifications();
   } else {
-    alert("لازم تسمح بالإشعارات من إعدادات المتصفح");
+    toast("لازم تسمح بالإشعارات من إعدادات المتصفح", "bad");
   }
 });
 
-render();
-checkNotifications();
-setInterval(() => { render(); checkNotifications(); }, 60 * 60 * 1000);
-setTimeout(() => document.getElementById("splash").classList.add("hide"), 2800);
+function exportData() {
+  const blob = new Blob([JSON.stringify(items, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "iqama-backup-" + toISO(new Date()) + ".json";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  toast("اتصدّرت النسخة الاحتياطية 💾", "ok");
+}
 
-// تسجيل الـ Service Worker عشان التطبيق يتثبت ويشتغل أوفلاين
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("sw.js").catch(() => {});
-  });
+$("importFile").addEventListener("change", e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const data = JSON.parse(r.result);
+      const valid = Array.isArray(data) ? data.filter(x => x && x.id && x.name && x.end) : [];
+      if (!valid.length) { toast("الملف مش صالح", "bad"); return; }
+      if (!confirm(`هيتم استيراد ${valid.length} إقامة وهتتشال البيانات الحالية. تكمل؟`)) return;
+      items = valid;
+      save();
+      withAnim(render);
+      toast("تم الاستيراد ✅", "ok");
+    } catch (err) {
+      toast("الملف مش صالح", "bad");
+    }
+  };
+  r.readAsText(f);
+  e.target.value = "";
+});
+
+// ===== التشغيل =====
+buildStats();
+applyTheme();
+updateCalBtn();
+applyDateMode();
+withAnim(render);
+moveInd(document.querySelector("nav button.active"));
+window.addEventListener("resize", () => moveInd(document.querySelector("nav button.active")));
+
+if (!EMBED) {
+  checkNotifications();
+  setInterval(() => { render(); checkNotifications(); }, 60 * 60 * 1000);
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("sw.js").catch(() => {});
+    });
+  }
 }
 </script>
 </body>
